@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>John Sweeney</title>
+	<meta charset="utf-8" />
+	{% load staticfiles %} <!--needed to load all ststic files such as css/js/img-->
+	<link rel="stylesheet" href="{% static 'personal/css/bootstrap.min.css' %}" type = "text/css"/>
+	
+
+	<meta name="viewport" content = "width=device-width, initial-scale=1.0">
+	
+	<style type="text/css">
+		html,
+		body {
+		  height:100%
+		}
+	</style>
+</head>
+
+<body class="body" style="background-color:#f6f6f6">
+	<div class="container-fluid" style="min-height:95%; ">
+		<div class="row">
+			
+			  <div class="col-sm-3">
+				  <br>
+				  <center>
+					<img src="{% static 'personal/img/fitness.jpg' %}" class="responsive-img" style='max-height:100px;' alt="fitness">
+				  </center>
+			  </div>
+			  <div class="col-sm-6">
+				  <br>
+				  <center>
+				  <h2>Life is better with tighter control </h2>
+				  </center>
+			  </div>
+			   <div class="col-sm-3">
+				  <br>
+				  <center>
+					<img src="{% static 'personal/img/oldage.jpg' %}" class="responsive-img" align="middle" style='max-height:100px;' alt="Long Life">
+				  </center>
+			  </div>
+		</div><hr>
+
+		<div class="row">
+
+		  <div class="col-sm-10">
+		  
+			<div class='container-fluid'>
+			<br><br>
+			   {% block content %}
+			   {% endblock %}	
+			</div>
+		  </div>
+		</div> 
+	</div>
+
+
+	<!--graph of averages-->
+
+	<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto">
+
+    </div>	
+	<footer>
+		<div class="container-fluid" style='margin-left:15px'>
+			<p><a href="#" target="blank">Contact</a> | <a href="#" target="blank">LinkedIn</a> | <a href="#" target="blank">Twitter</a> | <a href="#" target="blank">Google+</a></p>
+		</div>
+	</footer>
+		<!--graph of averages-->
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <!--graph of averages-->
+	<script src="static/personal/js/arearange.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+	
+</body>
+
+</html>

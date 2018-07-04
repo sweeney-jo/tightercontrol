@@ -1,0 +1,10 @@
+{% extends "personal/header.html" %}
+{% load static %}
+{% block content %}<!--without extends this bit of web page can be included anywhere -->
+<h3>Import Csv</h3>
+  <form method="post" enctype="multipart/form-data"> <!--When files are submitted to the server, the file data ends up placed in request.FILES.It is mandatory for the HTML form to have the attribute enctype="multipart/form-data" set correctly. Otherwise the request.FILES will be empty.-->
+    {% csrf_token %}
+    <input type="file" name="myfile">
+    <button type="submit">Upload</button>
+  </form>
+{% endblock %}
