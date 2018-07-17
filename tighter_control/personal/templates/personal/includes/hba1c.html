@@ -1,0 +1,33 @@
+{% load static %} {%block content%}
+<script>
+    //window.onload = function() {
+    $(document).ready(function () {  //Using event hooking: Browser's rendering engine provides a hook through function which gives you the hint that browser has finished loading the DOM
+
+        var endpoint = '/HbA1c/'
+
+        $.ajax({
+            method: "GET",
+            url: endpoint,
+            success: function (data) {
+                console.log(data)
+                console.log(data.hBA1c)
+                console.log(data["Highest Glucose reading"])
+
+
+                document.getElementById("hbA1cRsult").innerHTML = data.hBA1c;
+              
+
+            },
+            error: function (error_data) {
+                console.log("error")
+                console.log(error_data)
+            }
+        })
+
+    })
+</script>
+<h3>HbA1C Result:</h3>
+<div id="hbA1cRsult"></div>
+
+
+{%endblock%}

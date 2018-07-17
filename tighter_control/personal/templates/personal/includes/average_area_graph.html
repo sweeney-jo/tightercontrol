@@ -1,0 +1,196 @@
+{% load static %} {%block content%}
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<div id="container2" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<h3>WDA Result:</h3>
+<div id="wda"></div>
+<!--graph of averages must be above js call for highcharts to be defined-->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<!--graph of averages-->
+{% block jquery%}
+<script>
+    $(document).ready(function () {  //Using event hooking: Browser's rendering engine provides a hook through function which gives you the hint that browser has finished loading the DOM
+
+        var endpoint = '/HbA1c/'
+        var weekly_daily_average = []
+        var labels = []
+        var ranges = []
+        var averages = []
+        var weekly_daily_lows = []
+        var chart1;
+        var chart2;
+        var wda_array = []
+        var newStr = []
+        var no_bracket_array = []
+        var wda_float = []
+        var swda_float = []
+        var twda_float = []
+        var dAvg_float =[]
+        $.ajax({
+            method: "GET",
+            url: endpoint,
+            success: function (data) {
+                console.log(data)
+                console.log(data["daily highs"])
+                console.log(data["daily lows"])
+                console.log(data["daily average"])
+                console.log(data["last week daily averages"])
+                console.log(data["days"])
+                weekly_daily_average = data["last week daily averages"];
+                second_weekly_daily_average = data["2nd last week daily average"]
+                third_weekly_daily_average = data["3rd last week daily average"]
+                weekly_daily_lows = data["daily lows"];
+                labels = data["days"]
+                daily_averages = data["daily average"]
+                // newStr = weekly_daily_average.substring(1, weekly_daily_average.length-1);//remove outer json[]
+                //  wda_array = newStr.split(",") //put newStr into []
+                //  no_bracket_array = wda_array.replace(/[\[\]']+/g,'')
+                //no_bracket_array = eval(weekly_daily_average).join(",") //removes []s
+                //wda_array = no_bracket_array.split(",") //put newStr into []
+
+                floatParse(daily_averages,dAvg_float)
+                floatParse(weekly_daily_average, wda_float) //function to take in string array and parse to float array
+                floatParse(second_weekly_daily_average, swda_float)
+                floatParse(third_weekly_daily_average, twda_float)
+                function floatParse(strArray, floatArray) {
+                    strArray = eval(strArray).join(",")//removes [[]]'s from json variable'
+                    strArray = strArray.split(",")// put strArray into array so for loop can be utilised
+                    for (var i = 0; i < strArray.length; i++) {
+                        floatArray[i] = parseFloat(strArray[i]);//create float array
+
+                    }
+                }
+                document.getElementById("wda").innerHTML = dAvg_float
+
+
+                ranges = wda_float
+
+                averages = dAvg_float
+
+
+                chart1 = Highcharts.chart('container', {
+                    chart: {
+                        renderTo: 'container'
+
+                    },
+
+                    title: {
+                        text: 'Glucose Reading Averages'
+                    },
+
+                    xAxis: {
+                        type: 'datetime'
+                    },
+
+                    yAxis: {
+                        title: {
+                            text: 'Mmol/L'
+                        }
+                    },
+
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: 'Mmol/L'
+                    },
+
+                    legend: {
+                    },
+
+                    series: [{
+                        name: 'Blood Sugar',
+                        data: averages,
+                        zIndex: 1,
+                        marker: {
+                            fillColor: 'white',
+                            lineWidth: 2,
+                            lineColor: Highcharts.getOptions().colors[0]
+                        }
+                    }, {
+                        name: 'Range',
+                        data: ranges,
+                        type: 'arearange',
+                        lineWidth: 0,
+                        linkedTo: ':previous',
+                        color: Highcharts.getOptions().colors[0],
+                        fillOpacity: 0.3,
+                        zIndex: 0,
+                        marker: {
+                            enabled: false
+                        }
+                    }]
+                });
+
+
+                cahrt2 = Highcharts.chart('container2', {
+                    chart: {
+                        type: 'areaspline'
+                    },
+                    title: {
+                        text: 'Blood glucose Weekly Comparison'
+                    },
+                    legend: {
+                        layout: 'vertical',
+                        align: 'left',
+                        verticalAlign: 'top',
+                        x: 150,
+                        y: 100,
+                        floating: true,
+                        borderWidth: 1,
+                        backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+                    },
+                    xAxis: {
+                        ceiling: 5,
+                        maxPadding: 0,
+                        categories: labels,
+                        plotBands: [{ // visualize the weekend
+                            from: 4.0,
+                            to: 5.5,
+                            color: 'rgba(68, 170, 213, .2)'
+                        }]
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Glucose level'
+                        }
+                    },
+                    tooltip: {
+                        shared: true,
+                        valueSuffix: 'Mmol/L'
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        areaspline: {
+                            fillOpacity: 0.5
+                        }
+                    },
+                    series: [{
+                        name: 'week 1',
+                        // data: weekly_daily_average
+                        data: wda_float
+                    }, {
+                        name: 'week 2',
+                        data: swda_float
+                    }, {
+                        name: 'week 3',
+                        // data: weekly_daily_average
+                        data: twda_float
+                    }, {
+                        name: 'Bolus',
+                        data: [1, 1, 1, 1, 1, 1, 1]
+                    }]
+                });
+
+            },
+            error: function (error_data) {
+                console.log("error")
+                console.log(error_data)
+            }
+        })
+
+    })
+
+</script> {% endblock %}{% endblock %}
