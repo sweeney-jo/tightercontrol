@@ -1,14 +1,19 @@
 {% load static %} {%block content%}
 <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
 <div id="container2" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+{% include "personal/includes/Form_for_date.html" %}
+<!--includes form to enter dates to render daily blood graph-->
+<div id="container3" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
 <h3>WDA Result:</h3>
 <div id="wda"></div>
 <!--graph of averages must be above js call for highcharts to be defined-->
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.highcharts.com/highcharts-more.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
 <!--graph of averages-->
 {% block jquery%}
+
 <script>
     $(document).ready(function () {  //Using event hooking: Browser's rendering engine provides a hook through function which gives you the hint that browser has finished loading the DOM
 
@@ -26,7 +31,25 @@
         var wda_float = []
         var swda_float = []
         var twda_float = []
-        var dAvg_float =[]
+        var dAvg_float = []
+        var dLows_float = []
+        var dHighs_float = []
+        var switched_array = []
+        var range = []
+        var date_of_range = []
+        var dLow_switched = []
+        var dHigh_switched = []
+        var time_stamped_dAvg_float = []
+        var time_stamped_dAvg_floatswitched = []
+        var twenty_four_hour_reading = []
+        var twenty_four_hour_reading_float = []
+        var twenty_four_hour_reading_floatswitched = []
+        var twenty_four_hour_bloods = []
+        var carb_reading_float = []
+        var carb_reaading_floatswitched = []
+        var carbohydrates = []
+        var insulin_dosage_float = []
+        var insulin_dosage_floatswitched = []
         $.ajax({
             method: "GET",
             url: endpoint,
@@ -37,22 +60,34 @@
                 console.log(data["daily average"])
                 console.log(data["last week daily averages"])
                 console.log(data["days"])
+                console.log(data["24 hour readings"])
+                console.log(data["carb reading"])
+                console.log(data["insulin dosage"])
                 weekly_daily_average = data["last week daily averages"];
                 second_weekly_daily_average = data["2nd last week daily average"]
                 third_weekly_daily_average = data["3rd last week daily average"]
-                weekly_daily_lows = data["daily lows"];
+                daily_lows = data["daily lows"];
+                daily_highs = data["daily highs"];
                 labels = data["days"]
                 daily_averages = data["daily average"]
+                twenty_four_hour_reading = data["24 hour readings"]
+                carb_reading = data["carb reading"]
+                insulin_dosage = data["insulin dosage"]
                 // newStr = weekly_daily_average.substring(1, weekly_daily_average.length-1);//remove outer json[]
                 //  wda_array = newStr.split(",") //put newStr into []
                 //  no_bracket_array = wda_array.replace(/[\[\]']+/g,'')
                 //no_bracket_array = eval(weekly_daily_average).join(",") //removes []s
                 //wda_array = no_bracket_array.split(",") //put newStr into []
 
-                floatParse(daily_averages,dAvg_float)
+                floatParse(daily_highs, dHighs_float)
+                floatParse(daily_lows, dLows_float)
+                floatParse(daily_averages, dAvg_float)
                 floatParse(weekly_daily_average, wda_float) //function to take in string array and parse to float array
                 floatParse(second_weekly_daily_average, swda_float)
                 floatParse(third_weekly_daily_average, twda_float)
+                floatParse(twenty_four_hour_reading, twenty_four_hour_reading_float)
+                floatParse(carb_reading, carb_reading_float)
+                floatParse(insulin_dosage, insulin_dosage_float)
                 function floatParse(strArray, floatArray) {
                     strArray = eval(strArray).join(",")//removes [[]]'s from json variable'
                     strArray = strArray.split(",")// put strArray into array so for loop can be utilised
@@ -61,12 +96,65 @@
 
                     }
                 }
-                document.getElementById("wda").innerHTML = dAvg_float
+                switchero(dLows_float, dLow_switched)
+                switchero(dHighs_float, dHigh_switched)
+                insertDate(dAvg_float, dHighs_float, time_stamped_dAvg_float)
+                switchero(time_stamped_dAvg_float, time_stamped_dAvg_floatswitched)
+                switchero(twenty_four_hour_reading_float, twenty_four_hour_reading_floatswitched)
+                switchero(carb_reading_float, carb_reaading_floatswitched)
+                switchero(insulin_dosage_float, insulin_dosage_floatswitched)
 
 
-                ranges = wda_float
+                document.getElementById("wda").innerHTML = insulin_dosage_floatswitched //got it switched but needs [,],[,] to work
 
-                averages = dAvg_float
+
+                function switchero(original_array, switched_array) {//need function to switch each element in high/low range [range][date] => [date][range]
+                    //   var original_array = original_array    
+                    //   var switched_array = []          variables added up top to make global
+                    //  var range = []
+                    //  var date_of_range = []
+
+                    for (var i = 0; i < original_array.length; i += 2) { //for loop for ranges[]
+                        range[i - i / 2] = original_array[i] //creates array of ranges[]
+                    }
+                    for (var i = 0; i < range.length; i++) { //for loop for ranges[] iwith empty elements at 1st pos
+                        switched_array[1 + (2 * i)] = range[i] //fll in ranges from position 1 +=2
+                    }
+                    for (var i = 1; i < original_array.length; i += 2) { //for loop for ranges[] iwith empty elements at 1st pos
+                        switched_array[i - 1] = original_array[i] //fll in ranges from position 1 +=2
+                    }
+                }
+                //dAvg_float          dHighs_float            
+                function insertDate(array_no_time_stamp, array_to_copy_timestamp, new_timestamped_array) {
+
+                    for (var i = 1; i < array_to_copy_timestamp.length; i += 2) { //for loop for date_of_range[]
+                        new_timestamped_array[i] = array_to_copy_timestamp[i] //creates array of dates
+                    }
+                    for (var i = 0; i < array_to_copy_timestamp.length; i += 2) { //for loop for ranges[]
+                        new_timestamped_array[i] = array_no_time_stamp[i - i / 2] //creates array of ranges[]
+
+                    }
+
+                }
+
+                //further method to split array [] into a two element subset which is required for highcharts
+                Object.defineProperty(Array.prototype, 'two_element_subset', {
+                    value: function (array_pairs) {
+                        var array = this;
+                        return [].concat.apply([],
+                            array.map(function (elem, i) {
+                                return i % array_pairs ? [] : [array.slice(i, i + array_pairs)];
+                            })
+                        );
+                    }
+                });
+                high_averages = dHigh_switched.two_element_subset(2)
+                low_averages = dLow_switched.two_element_subset(2)
+                averages = time_stamped_dAvg_floatswitched.two_element_subset(2)
+                carbohydrates = carb_reaading_floatswitched.two_element_subset(2)
+                insulin = insulin_dosage_floatswitched.two_element_subset(2)
+
+                twenty_four_hour_bloods = twenty_four_hour_reading_floatswitched.two_element_subset(2)
 
 
                 chart1 = Highcharts.chart('container', {
@@ -76,8 +164,9 @@
                     },
 
                     title: {
-                        text: 'Glucose Reading Averages'
+                        text: 'Quaterly Highs/Lows & Averages Mmol/L'
                     },
+                    
 
                     xAxis: {
                         type: 'datetime'
@@ -90,7 +179,7 @@
                     },
 
                     tooltip: {
-                        crosshairs: true,
+                        crosshairs: [true, true, true],
                         shared: true,
                         valueSuffix: 'Mmol/L'
                     },
@@ -99,26 +188,27 @@
                     },
 
                     series: [{
-                        name: 'Blood Sugar',
-                        data: averages,
-                        zIndex: 1,
+                        name: 'Lowest Blood Sugar',
+                        data: low_averages,
+                        zIndex: 4,
                         marker: {
-                            fillColor: 'white',
+                            fillColor: 'blue',
                             lineWidth: 2,
-                            lineColor: Highcharts.getOptions().colors[0]
+                            lineColor: Highcharts.getOptions().colors[1]
                         }
                     }, {
-                        name: 'Range',
-                        data: ranges,
-                        type: 'arearange',
-                        lineWidth: 0,
-                        linkedTo: ':previous',
-                        color: Highcharts.getOptions().colors[0],
-                        fillOpacity: 0.3,
-                        zIndex: 0,
+                        name: 'Highest Blood Sugar',
+                        data: high_averages,
+                        zIndex: 5,
                         marker: {
-                            enabled: false
+                            fillColor: 'red',
+                            lineWidth: 2,
+                            lineColor: Highcharts.getOptions().colors[1]
                         }
+                    }, {
+                        name: 'Averages',
+                        data: averages,
+                        dashStyle: 'longdash'
                     }]
                 });
 
@@ -141,10 +231,10 @@
                         backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
                     },
                     xAxis: {
-                        ceiling: 5,
+                        ceiling: 6,
                         maxPadding: 0,
                         categories: labels,
-                        plotBands: [{ // visualize the weekend
+                        plotBands: [{ // visualise the weekend
                             from: 4.0,
                             to: 5.5,
                             color: 'rgba(68, 170, 213, .2)'
@@ -181,6 +271,112 @@
                     }, {
                         name: 'Bolus',
                         data: [1, 1, 1, 1, 1, 1, 1]
+                    }]
+                });
+
+                chart3 = Highcharts.chart('container3', {
+                    chart: {
+                        renderTo: 'container3'
+
+                    },
+
+                    title: {
+                        text: '24 hour chart'
+                    },
+
+                    xAxis: {
+                        type: 'datetime'
+                    },
+
+
+                    yAxis: [{ // Primary yAxis 
+                        labels: {
+                            format: '{value} Mmol/L',
+                            style: {
+                                color: Highcharts.getOptions().colors[0]
+                            }
+                        },
+                        title: {
+                            text: 'Mmol/L',
+                            style: {
+                                color: Highcharts.getOptions().colors[0]
+                            }
+                        },
+                        opposite: true,
+                        //min: 0,
+                        //max: 100,
+                
+                    }, { // Secondary yAxis
+                        gridLineWidth: 0,
+                        title: {
+                            text: 'Carbohydrate',
+                            style: {
+                                color: Highcharts.getOptions().colors[1]
+                            }
+                        },
+                        labels: {
+                            format: '{value} grams',
+                            style: {
+                                color: Highcharts.getOptions().colors[1]
+                            }
+                        },
+                        opposite: true,
+                        //min: 0,
+                        //max: 25,
+                
+                    }, { // Tertiary yAxis
+                        gridLineWidth: 0,
+                        title: {
+                            text: 'Nova Rapid Insulin ',
+                            style: {
+                                color: Highcharts.getOptions().colors[3]
+                            }
+                        },
+                        labels: {
+                            format: '{value} units',
+                            style: {
+                                color: Highcharts.getOptions().colors[3]
+                            }
+                        },
+                        opposite: true,
+                        //min: 0,
+                        //max: 100,
+                    }],
+
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: 'Mmol/L'
+                    },
+
+                    legend: {
+                    },
+
+                    series: [{
+                        type: 'spline',
+                        name: 'Daily Bloods',
+                        yAxis: 0,
+                        data: twenty_four_hour_bloods,
+                        zIndex: 1,
+                        marker: {
+                            fillColor: 'blue',
+                            lineWidth: 2,
+                            lineColor: Highcharts.getOptions().colors[0]
+                        }
+                    }, {
+                        type: 'column',
+                        name: 'Carbohydrates',
+                        color: 'green',
+                        yAxis: 1,
+                        pointWidth: 80,
+                        data: carbohydrates//[ [ 1531612980000,6 ],[ 1531527240000,2 ] ] 
+                    },{
+                        type: 'column',
+                        name: 'Nova Rapid Insulin ',
+                        color:'red',
+                        yAxis: 2,
+                        pointWidth: 50,
+                        data: insulin
                     }]
                 });
 

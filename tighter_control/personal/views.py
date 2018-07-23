@@ -13,55 +13,6 @@ from rest_framework.response import Response
 
 from django.views.generic import View
 
-# creating panda dataframe holding time and entire glucose history results
-df = pd.DataFrame(list(Input.objects.all().values('time', 'historic_glucose')))
-# changing time string data type to datetime datatype
-df['time'] = pd.to_datetime(df['time'])
-# storing the last time regestired in range_max variable
-range_max = df['time'].max()
-# work back 7 days to get the earliest time and store in range_min variable
-range_min = range_max - datetime.timedelta(days=6)
-# sliced_df variable stores the range
-sliced_df = df[(df['time'] >= range_min) &
-               (df['time'] <= range_max)]
-
-# one week worth of data prior to sliced_df
-week_prior_sliced_df = df[(df['time'] >= (range_min - datetime.timedelta(days=6))) &
-                      (df['time'] <= range_min)]
-# one week worth of data prior to week_prior_sliced_df
-sliced_df_week3 = df[(df['time'] >= (range_min - datetime.timedelta(days=12))) &
-                      (df['time'] <= range_min - datetime.timedelta(days=6))]
-df['new time col']=df['time']
-# setting time as index//needed for methdos such as .resample
-df.set_index('time', inplace=True)
-# last weeks average readings
-sliced_df.set_index('time', inplace=True)
-last_week_dAvg=sliced_df.resample('D').mean()
-# 2nd last week average readings
-week_prior_sliced_df.set_index('time', inplace=True)
-second_last_week_dAvg=week_prior_sliced_df.resample('D').mean()
-# 3rd last week average readings
-sliced_df_week3.set_index('time', inplace=True)
-third_last_week_dAvg=sliced_df_week3.resample('D').mean()
-
-
-
-# average daily value
-dAvg=df.resample('D').mean()
-# highest daily value
-dHigh=df.resample('D').max()
-# lowest daily average
-dLow=df.resample('D').min()
-
-labels=[
-                'Monday',
-                'Tuesday',
-                'Wednesday',
-                'Thursday',
-                'Friday',
-                'Saturday',
-                'Sunday'
-            ]
 
 
 def index(request):  # always have to pass request, maybe its to be explicit
@@ -69,6 +20,64 @@ def index(request):  # always have to pass request, maybe its to be explicit
 
 
 def art_HbA1c(request):
+    # creating separate panda dataframe holding time and entire glucose,carbs,insulin history results
+    df = pd.DataFrame(list(Input.objects.all().values('time', 'historic_glucose')))
+    carb_df = pd.DataFrame(list(Input.objects.all().values('time', 'carbohydrates'))) 
+    insulin_df = pd.DataFrame(list(Input.objects.all().values('time', 'rapid_acting_insulin')))
+    # changing time string data type to datetime datatype
+    df['time'] = pd.to_datetime(df['time'])
+    carb_df['time'] = pd.to_datetime(carb_df['time'])
+    insulin_df['time'] = pd.to_datetime(insulin_df['time'])
+    # storing the last time regestired in range_max variable
+    range_max = df['time'].max()
+    # work back 7 days to get the earliest time and store in range_min variable
+    range_min = range_max - datetime.timedelta(days=6)
+    # sliced_df variable stores the range
+    sliced_df = df[(df['time'] >= range_min) &
+                (df['time'] <= range_max)]
+
+    # one week worth of data prior to sliced_df
+    week_prior_sliced_df = df[(df['time'] >= (range_min - datetime.timedelta(days=6))) &
+                        (df['time'] <= range_min)]
+    # one week worth of data prior to week_prior_sliced_df
+    sliced_df_week3 = df[(df['time'] >= (range_min - datetime.timedelta(days=12))) &
+                        (df['time'] <= range_min - datetime.timedelta(days=6))]
+    #set time to new variable so value can be called as old time variable set to index in next step
+    df['new time col']=df['time']
+    carb_df['new time col']=df['time']
+    insulin_df['new time col']=df['time']
+    # setting time as index//needed for methdos such as .resample
+    df.set_index('time', inplace=True)
+    carb_df.set_index('time', inplace=True)
+    insulin_df.set_index('time', inplace = True)
+    # last weeks average readings
+    sliced_df.set_index('time', inplace=True)
+    last_week_dAvg=sliced_df.resample('D').mean()
+    # 2nd last week average readings
+    week_prior_sliced_df.set_index('time', inplace=True)
+    second_last_week_dAvg=week_prior_sliced_df.resample('D').mean()
+    # 3rd last week average readings
+    sliced_df_week3.set_index('time', inplace=True)
+    third_last_week_dAvg=sliced_df_week3.resample('D').mean()
+    # average daily value
+    dAvg=df.resample('D').mean()
+    # highest daily value
+    dHigh=df.resample('D').max()
+    # lowest daily average
+    dLow=df.resample('D').min()
+
+    labels=[
+                    'Monday',
+                    'Tuesday',
+                    'Wednesday',
+                    'Thursday',
+                    'Friday',
+                    'Saturday',
+                    'Sunday'
+                ]
+    twenty_four_hour_reading = df['2018-07-12']
+    carb_reading = carb_df['2018-07-12']
+    insulin_reading = insulin_df['2018-07-12']
 
     data={
         "Highest Glucose reading": df['historic_glucose'].max(),
@@ -91,7 +100,11 @@ def art_HbA1c(request):
         "daily average": dAvg.to_json(orient='values'),
         "daily highs": dHigh.to_json(orient='values'),
         "daily lows": dLow.to_json(orient='values'),
-        "days": labels
+        "24 hour readings": twenty_four_hour_reading.to_json(orient='values'),
+        "carb reading" : carb_reading.to_json(orient='values'),
+        "insulin dosage": insulin_reading.to_json(orient = 'values'),
+        "days": labels,
+        
 
 
     }
