@@ -1,29 +1,84 @@
 import datetime
-from django.http import JsonResponse
 import json
-from django.shortcuts import render
-from django.db.models import Avg, Max, Min, Count, Q
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.db.models import Avg, Max, Min, Count, Q
 from resInput.models import Input
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
 from django.views.generic import View
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserChangeForm,UserCreationForm, PasswordChangeForm
+from django.contrib.auth.models import User
+from .forms import RegistrationForm, EditProfileForm
 
 
+def login_redirect(request):
+    return redirect('/login')
 
 def index(request):  # always have to pass request, maybe its to be explicit
     return render(request, 'personal/home.html')
 
+@login_required
+def profile(request):
+    args = {'user':request.user}
+    return render(request, 'personal/profile.html', args)
 
+#registration method 
+def register(request):
+    if request.method =='POST':
+      #  form = UserCreationForm(request.POST)
+        form = RegistrationForm(request.POST) #Registration form extened from Usercreation form to add extra variables
+        if form.is_valid():
+            form.save()
+            return redirect('/profile')
+    else:
+        #  form = UserCreationForm()
+        form = RegistrationForm()
+
+        args = {'form': form}
+        return render(request, 'registration/reg_form.html', args)
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, instance = request.user)
+
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = EditProfileForm(instance = request.user)
+        args = {'form':form}
+        return render(request, 'personal/edit_profile.html', args)
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(data = request.POST, user = request.user)
+
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, form.user)#keeps user logged in when changing password
+            return redirect('profile')
+        else:
+             
+            return redirect('/changepassword')
+    else:
+        form = PasswordChangeForm(user = request.user)
+        args = {'form':form}
+        return render(request, 'personal/change_password.html', args)   
+@login_required
 def art_HbA1c(request):
     # creating separate panda dataframe holding time and entire glucose,carbs,insulin history results
-    df = pd.DataFrame(list(Input.objects.all().values('time', 'historic_glucose')))
-    carb_df = pd.DataFrame(list(Input.objects.all().values('time', 'carbohydrates'))) 
-    insulin_df = pd.DataFrame(list(Input.objects.all().values('time', 'rapid_acting_insulin')))
+    df = pd.DataFrame(
+        list(Input.objects.all().values('time', 'historic_glucose')))
+    carb_df = pd.DataFrame(
+        list(Input.objects.all().values('time', 'carbohydrates')))
+    insulin_df = pd.DataFrame(
+        list(Input.objects.all().values('time', 'rapid_acting_insulin')))
     # changing time string data type to datetime datatype
     df['time'] = pd.to_datetime(df['time'])
     carb_df['time'] = pd.to_datetime(carb_df['time'])
@@ -34,52 +89,52 @@ def art_HbA1c(request):
     range_min = range_max - datetime.timedelta(days=6)
     # sliced_df variable stores the range
     sliced_df = df[(df['time'] >= range_min) &
-                (df['time'] <= range_max)]
+                   (df['time'] <= range_max)]
 
     # one week worth of data prior to sliced_df
     week_prior_sliced_df = df[(df['time'] >= (range_min - datetime.timedelta(days=6))) &
-                        (df['time'] <= range_min)]
+                              (df['time'] <= range_min)]
     # one week worth of data prior to week_prior_sliced_df
     sliced_df_week3 = df[(df['time'] >= (range_min - datetime.timedelta(days=12))) &
-                        (df['time'] <= range_min - datetime.timedelta(days=6))]
-    #set time to new variable so value can be called as old time variable set to index in next step
-    df['new time col']=df['time']
-    carb_df['new time col']=df['time']
-    insulin_df['new time col']=df['time']
+                         (df['time'] <= range_min - datetime.timedelta(days=6))]
+    # set time to new variable so value can be called as old time variable set to index in next step
+    df['new time col'] = df['time']
+    carb_df['new time col'] = df['time']
+    insulin_df['new time col'] = df['time']
     # setting time as index//needed for methdos such as .resample
     df.set_index('time', inplace=True)
     carb_df.set_index('time', inplace=True)
-    insulin_df.set_index('time', inplace = True)
+    insulin_df.set_index('time', inplace=True)
     # last weeks average readings
     sliced_df.set_index('time', inplace=True)
-    last_week_dAvg=sliced_df.resample('D').mean()
+    last_week_dAvg = sliced_df.resample('D').mean()
     # 2nd last week average readings
     week_prior_sliced_df.set_index('time', inplace=True)
-    second_last_week_dAvg=week_prior_sliced_df.resample('D').mean()
+    second_last_week_dAvg = week_prior_sliced_df.resample('D').mean()
     # 3rd last week average readings
     sliced_df_week3.set_index('time', inplace=True)
-    third_last_week_dAvg=sliced_df_week3.resample('D').mean()
+    third_last_week_dAvg = sliced_df_week3.resample('D').mean()
     # average daily value
-    dAvg=df.resample('D').mean()
+    dAvg = df.resample('D').mean()
     # highest daily value
-    dHigh=df.resample('D').max()
+    dHigh = df.resample('D').max()
     # lowest daily average
-    dLow=df.resample('D').min()
+    dLow = df.resample('D').min()
 
-    labels=[
-                    'Monday',
-                    'Tuesday',
-                    'Wednesday',
-                    'Thursday',
-                    'Friday',
-                    'Saturday',
-                    'Sunday'
-                ]
+    labels = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday'
+    ]
     twenty_four_hour_reading = df['2018-07-12']
     carb_reading = carb_df['2018-07-12']
     insulin_reading = insulin_df['2018-07-12']
 
-    data={
+    data = {
         "Highest Glucose reading": df['historic_glucose'].max(),
         "Lowest Glucose reading": df['historic_glucose'].min(),
         "hBA1c": (((2.59) + (df['historic_glucose'].mean()))/(1.59)),
@@ -92,19 +147,19 @@ def art_HbA1c(request):
         # "last month reading list": sugar_list.to_json(orient='values'),
         #  "Date Time": sliced_df.to_json(orient='table') #sliced_df is glucose and time .to_json allows series to be serialised to json format
         #  "days of dataframe": sliced_df['time'].dt.weekday_name.to_json(orient="table"),
-       # "last week daily averages" :last_week_dAvg.to_json(orient='values'),
-       # "last week daily averages" :"[[8.2631578947], [7.9227848101], [9.3042105263], [10.3252631579], [10.66125], [9.6817204301], [5.9903846154]]",
+        # "last week daily averages" :last_week_dAvg.to_json(orient='values'),
+        # "last week daily averages" :"[[8.2631578947], [7.9227848101], [9.3042105263], [10.3252631579], [10.66125], [9.6817204301], [5.9903846154]]",
         "last week daily averages": last_week_dAvg.to_json(orient='values'),
-        "2nd last week daily average": second_last_week_dAvg.to_json(orient = 'values'),
-        "3rd last week daily average": third_last_week_dAvg.to_json(orient = 'values'),
+        "2nd last week daily average": second_last_week_dAvg.to_json(orient='values'),
+        "3rd last week daily average": third_last_week_dAvg.to_json(orient='values'),
         "daily average": dAvg.to_json(orient='values'),
         "daily highs": dHigh.to_json(orient='values'),
         "daily lows": dLow.to_json(orient='values'),
         "24 hour readings": twenty_four_hour_reading.to_json(orient='values'),
-        "carb reading" : carb_reading.to_json(orient='values'),
-        "insulin dosage": insulin_reading.to_json(orient = 'values'),
+        "carb reading": carb_reading.to_json(orient='values'),
+        "insulin dosage": insulin_reading.to_json(orient='values'),
         "days": labels,
-        
+
 
 
     }
@@ -112,10 +167,10 @@ def art_HbA1c(request):
 
 
 def average_area(request, *args, **kwargs):
-    dataset=pd.DataFrame(
+    dataset = pd.DataFrame(
         list(Input.objects.all().values('time', 'historic_glucose')))
     Input.objects.all().aggregate(Avg('historic_glucose'))
-    data={
+    data = {
         "sales": 100,
         "customer": 10,
         "Input": Input.objects.all().count(),
@@ -129,24 +184,24 @@ def daily_reading(request):
     """
     daily reading will take the last 24 hour glucose readings
     """
-    df=pd.DataFrame(
+    df = pd.DataFrame(
         list(Input.objects.all().values('time', 'historic_glucose')))
-    df=df.loc[df['record_type'] == 0.0]
-    df['time']=pd.to_datetime(df['time'])
-    range_max=df['time'].max()
-    range_min=range_max - datetime.timedelta(days=2)
-    sliced_df=df[(df['time'] >= range_min) &
+    df = df.loc[df['record_type'] == 0.0]
+    df['time'] = pd.to_datetime(df['time'])
+    range_max = df['time'].max()
+    range_min = range_max - datetime.timedelta(days=2)
+    sliced_df = df[(df['time'] >= range_min) &
                    (df['time'] <= range_max)]
     return render(request, 'personal/header.html', {'sliced_df': sliced_df})
 
 
 def week_chart(request):
-    df=pd.DataFrame(
+    df = pd.DataFrame(
         list(Input.objects.all().values('time', 'historic_glucose')))
-    df['time']=pd.to_datetime(df['time'])
-    range_max=df['time'].max()
-    range_min=range_max - datetime.timedelta(days=7)
-    sliced_df=df[(df['time'] >= range_min) &
+    df['time'] = pd.to_datetime(df['time'])
+    range_max = df['time'].max()
+    range_min = range_max - datetime.timedelta(days=7)
+    sliced_df = df[(df['time'] >= range_min) &
                    (df['time'] <= range_max)]
     sliced_df.plot(x='time', y='historic_glucose')
     plt.show()
@@ -154,14 +209,14 @@ def week_chart(request):
 
 
 class ChartData(APIView):
-    authentication_classes=[]
-    permission_classes=[]
+    authentication_classes = []
+    permission_classes = []
 
     def get(self, request, format=None):
-        qs_count=Input.objects.all().count()
-        labels=["Inputs", "Blue", "Yellow", "Green", "Purple", "Orange"]
-        default_items=[qs_count, 23, 2, 3, 12, 2]
-        data={
+        qs_count = Input.objects.all().count()
+        labels = ["Inputs", "Blue", "Yellow", "Green", "Purple", "Orange"]
+        default_items = [qs_count, 23, 2, 3, 12, 2]
+        data = {
             "labels": labels,
             "default": default_items,
         }

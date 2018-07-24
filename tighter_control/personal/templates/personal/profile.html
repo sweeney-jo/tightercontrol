@@ -1,0 +1,54 @@
+{% extends "personal/base.html" %} {% block content %}
+<title>Profile</title>
+
+<div class="row">
+
+    <div class="col-sm-6">
+
+        <div class='container-fluid'>
+            <div class="container">
+                <h1>Profile</h1>
+                {% if user.profile.image %}
+                <img src="{{ user.profile.image.url }}" width="240">
+                {% else %}
+                <img src="\static\personal\images\anonymous-avatar-sm.jpg" width="240">
+                {% endif %}
+                <p>Username: {{ user }}</p>
+                <p>First name: {{ user.first_name }}</p>
+                <p>Last name: {{ user.last_name }}</p>
+                <p>Email: {{ user.email }}</p>
+                <p>Description: {{ user.profile.description }}</p>
+                <p>City: {{ user.profile.city }}</p>
+
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+
+    <div class="col-sm-3">
+
+        <div class='container-fluid'>
+
+            <ul>
+                <li>
+                    <a href="{% url 'week_chart' %}">Weekly Chart</a>
+                </li>
+                <li>
+                    <a href="{% url 'api-data' %}">Average Area</a>
+                </li>
+                <li>
+                    <a href="{% url 'art_HbA1c' %}">HbA1c Dude</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    {% include "personal/includes/csv.html" %} {% endblock %}
+</div>
+
+

@@ -1,14 +1,10 @@
-{% extends "personal/header.html" %}<!--logic extends the path i.e header page when this home page is rendered.//another import instead of extends is includes, which is better for adding multiple pages to render-->
+{% extends "personal/base.html" %}<!--logic extends the path i.e header page when this home page is rendered.//another import instead of extends is includes, which is better for adding multiple pages to render-->
 
 
  {%block content%} <!---->
  
- <ul>
-    <li><a href="{% url 'week_chart' %}">Weekly Chart</a></li>
-    <li><a href="{% url 'api-data' %}">Average Area</a></li>
-    <li><a href="{% url 'art_HbA1c' %}">HbA1c Dude</a></li>
-  </ul>
-{% include "personal/includes/csv.html" %}
+
+
  {% include "personal/includes/htmlsnippet.html" %}<!--django assumes /templates/|||||includes directory is for short snippets of code -->
   
  {% endblock %}

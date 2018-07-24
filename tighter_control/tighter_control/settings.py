@@ -123,3 +123,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+MEDIA_URL = '/media/'
+#creates media folder in main dir to store static images
+MEDIA_Root = os.path.join(BASE_DIR, 'tighter_control/media')
+
+#redirects to log in page
+LOGIN_REDIRECT_URL = '/profile/'  
