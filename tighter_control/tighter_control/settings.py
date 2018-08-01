@@ -11,9 +11,10 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+from decouple import config #used to hide keys in env
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__), ))
 
 
 # Quick-start development settings - unsuitable for production
@@ -52,6 +53,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+   # 'current_user.CurrentUserMiddleware',
+   
 ]
 
 ROOT_URLCONF = 'tighter_control.urls'
@@ -129,4 +133,12 @@ MEDIA_URL = '/media/'
 MEDIA_Root = os.path.join(BASE_DIR, 'tighter_control/media')
 
 #redirects to log in page
-LOGIN_REDIRECT_URL = '/profile/'  
+LOGIN_REDIRECT_URL = '/profile/' 
+LOGIN_URL = '/login/' 
+
+IMPORT_EXPORT_USE_TRANSACTIONS = True
+
+N_IX_APP_ID = config('N_IX_APP_ID', default='')
+N_IX_APP_KEY = config('N_IX_APP_KEY', default='')
+
+

@@ -24,12 +24,8 @@
             </div>
 
         </div>
+        
     </div>
-
-
-
-
-
     <div class="col-sm-3">
 
         <div class='container-fluid'>
@@ -39,16 +35,17 @@
                     <a href="{% url 'week_chart' %}">Weekly Chart</a>
                 </li>
                 <li>
-                    <a href="{% url 'api-data' %}">Average Area</a>
+                    <a href="{% url 'api-data' %}">Two Day Log</a>
                 </li>
                 <li>
-                    <a href="{% url 'art_HbA1c' %}">HbA1c Dude</a>
+                    <a href="{% url 'dailyAv' %}">Daily Reading</a>
                 </li>
             </ul>
         </div>
-    </div>
+    
 
-    {% include "personal/includes/csv.html" %} {% endblock %}
+         {% endblock %}
+    </div>
 </div>
 
 

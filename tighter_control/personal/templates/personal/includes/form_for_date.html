@@ -1,15 +1,11 @@
 {% load static %} {% block content %}
 
 
-<form action="/HbA1c/" method="post">
+<form action="/HbA1c/" method="get">
   {% csrf_token %} {{ form }}
-  Date: <input type="date" name="date">
+  Date: <input type="date" name="dat">
 </form>
 
-<form action="/your-name/" method="post">
-  <label for="your_name">Your name: </label>
-  <input id="your_name" type="text" name="your_name" value="{{ current_name }}">
-  <input type="submit" value="OK">
-</form> 
+
 
 {% endblock %}

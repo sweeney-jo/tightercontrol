@@ -53,6 +53,13 @@
                         </a>
                     </li>
                 </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/carb_counter">Carb Counter
+                            <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                </ul>
                 {% if user.is_authenticated %}
                 <ul class="navbar-nav">
                     <li class="nav-item active">
@@ -78,43 +85,42 @@
             </div>
             <div class="collapse navbar-collapse justify-content-md-end" id="navbarsExample10">
                 <ul class="navbar-nav">
-                        <li class="nav-item active">
-                            <a class="nav-link" href="/logout">Log out
-                                <span class="sr-only">(current)</span>
-                            </a>
-                        </li>
-                    </ul>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/logout">Log out
+                            <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                </ul>
             </div>
 
 
-           
+
             {% else %}
             <div class="collapse navbar-collapse justify-content-md-end" id="navbarsExample10">
                 <ul class="navbar-nav">
-                    
                     <li class="nav-item active">
-                        <a class="nav-link" href="/register">Sign up 
+                        <a class="nav-link" href="/register">Sign up
                             <span class="sr-only">(current)</span>
                         </a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
-                        <li class="nav-item active">
-                            <a class="nav-link" href="/login">Login
-                                <span class="sr-only">(current)</span>
-                            </a>
-                        </li>
-                    </ul>
-                    {% endif %}
-            
-       
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/login">Login
+                            <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+
+
         </nav>
         <div class="row">
             <div class="container">
                 {% block content %} {% endblock %}
             </div>
         </div>
-    </div>
+        </div>
 
     </div>
     <br>
@@ -130,10 +136,10 @@
     <footer>
         <div class="container-fluid" style='margin-left:15px'>
             <p>
-                <a href="#" target="blank">Contact</a> |
-                <a href="#" target="blank">LinkedIn</a> |
-                <a href="#" target="blank">Twitter</a> |
-                <a href="#" target="blank">Google+</a>
+                <a href="http://www.ecomet.eu/contact" target="blank">Contact</a> |
+                <a href="https://www.linkedin.com/in/john-sweeney-09623174/" target="blank">LinkedIn</a> |
+                <a href=https://twitter.com/sweene?lang=en target="blank">Twitter</a> |
+
             </p>
         </div>
     </footer>
@@ -141,7 +147,7 @@
 
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+
 
 
 </body>

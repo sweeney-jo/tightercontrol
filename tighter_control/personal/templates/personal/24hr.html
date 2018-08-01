@@ -1,0 +1,18 @@
+{% extends "personal/base.html" %}{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+
+<div id="container3" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<h2>Date</h2>
+<form role="search" method="get">
+  <input type="text" name="dat">
+  <input type="submit" value="Search" />
+</form>
+
+<h3>Selected date:</h3>
+<div id="wda"></div>
+{% include 'personal/includes/hba1c.html' %}{% include 'personal/includes/average_area_graph.html' %}{%endblock%}

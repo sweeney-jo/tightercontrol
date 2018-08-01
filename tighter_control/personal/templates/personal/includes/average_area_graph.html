@@ -1,11 +1,18 @@
 {% load static %} {%block content%}
+User: {{user}}<br>
+<!--pk: {{user.pk}}<br>-->
+<!--prof_id: {{user.profile.pk}}-->
 <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
 <div id="container2" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-{% include "personal/includes/Form_for_date.html" %}
+<form action="/home/" method="POST">
+    {% csrf_token %} {{ form }}
+    Date: <input type="date" name="dat">
+    <input type="submit" value="Search" />
+  </form>
 <!--includes form to enter dates to render daily blood graph-->
 <div id="container3" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-<h3>WDA Result:</h3>
-<div id="wda"></div>
+<!--<h3>WDA Result:</h3>-->
+<!--<div id="wda"></div>frontend tester-->
 <!--graph of averages must be above js call for highcharts to be defined-->
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.highcharts.com/highcharts-more.js"></script>
@@ -63,6 +70,7 @@
                 console.log(data["24 hour readings"])
                 console.log(data["carb reading"])
                 console.log(data["insulin dosage"])
+                console.log(data["the date"])
                 weekly_daily_average = data["last week daily averages"];
                 second_weekly_daily_average = data["2nd last week daily average"]
                 third_weekly_daily_average = data["3rd last week daily average"]
@@ -73,12 +81,14 @@
                 twenty_four_hour_reading = data["24 hour readings"]
                 carb_reading = data["carb reading"]
                 insulin_dosage = data["insulin dosage"]
+                the_date = data["the date"]
                 // newStr = weekly_daily_average.substring(1, weekly_daily_average.length-1);//remove outer json[]
                 //  wda_array = newStr.split(",") //put newStr into []
                 //  no_bracket_array = wda_array.replace(/[\[\]']+/g,'')
                 //no_bracket_array = eval(weekly_daily_average).join(",") //removes []s
                 //wda_array = no_bracket_array.split(",") //put newStr into []
 
+                //method to convert data into float datatype
                 floatParse(daily_highs, dHighs_float)
                 floatParse(daily_lows, dLows_float)
                 floatParse(daily_averages, dAvg_float)
@@ -96,16 +106,20 @@
 
                     }
                 }
+
+                // to rotate position of datetime data with reading value as is constraint for Highcharts
                 switchero(dLows_float, dLow_switched)
                 switchero(dHighs_float, dHigh_switched)
+                //data requires date index to work with highcharts
                 insertDate(dAvg_float, dHighs_float, time_stamped_dAvg_float)
+
                 switchero(time_stamped_dAvg_float, time_stamped_dAvg_floatswitched)
                 switchero(twenty_four_hour_reading_float, twenty_four_hour_reading_floatswitched)
                 switchero(carb_reading_float, carb_reaading_floatswitched)
                 switchero(insulin_dosage_float, insulin_dosage_floatswitched)
 
 
-                document.getElementById("wda").innerHTML = insulin_dosage_floatswitched //got it switched but needs [,],[,] to work
+               // document.getElementById("wda").innerHTML = the_date //frontend test
 
 
                 function switchero(original_array, switched_array) {//need function to switch each element in high/low range [range][date] => [date][range]

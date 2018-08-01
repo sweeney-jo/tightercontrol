@@ -1,0 +1,41 @@
+{% extends "personal/base.html" %} {% block content %}
+<h2>Carb Counter</h2>
+<form role="search" method="get">
+  <input type="text" name="q" placeholder="Apple">
+  <input type="submit" value="Search" />
+</form>
+
+<hr> 
+
+<style>
+  .grid-container {
+    display: grid;
+    grid-column-gap: 50px;
+    grid-template-columns: auto auto auto;
+    background-color: #2196F3;
+    padding: 10px;
+  }
+
+  .grid-item {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    font-size: 30px;
+    text-align: center;
+  }
+</style>
+<div class="grid-container">
+  <div class="grid-item">Food Source</div>
+  <div class="grid-item">Carbohydrate</div>
+  <div class="grid-item">Fat</div>
+  <div class="grid-item">{{food.name}}</div>
+  <div class="grid-item">{{food.carb}}grms</div>
+  <div class="grid-item">{{food.fat}}grms</div>
+</div>
+
+<hr> {%if food.success%}
+<h3>{{answer}}</h3>
+{%else%}
+<h3>I am sorry but
+  <strong>{{food.query}}</strong> does not appear to be in the database, are you sure it's food?</h3>
+{%endif%} {% endblock %}

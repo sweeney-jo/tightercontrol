@@ -1,10 +1,9 @@
-{% extends "personal/base.html" %}<!--logic extends the path i.e header page when this home page is rendered.//another import instead of extends is includes, which is better for adding multiple pages to render-->
+{% extends "personal/header.html" %}<!--logic extends the path i.e header page when this home page is rendered.//another import instead of extends is includes, which is better for adding multiple pages to render-->
 
 
  {%block content%} <!---->
- 
+ <a href="{% url 'profile' %}">Return to Profile</a>
 
-
- {% include "personal/includes/htmlsnippet.html" %}<!--django assumes /templates/|||||includes directory is for short snippets of code -->
+<!--django assumes /templates/|||||includes directory is for short snippets of code -->
   
  {% endblock %}

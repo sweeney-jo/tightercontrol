@@ -45,8 +45,5 @@ urlpatterns = [
     url(r'^', include('personal.urls')), #root^$page
   
     url(r'^upload/', include('resInput.urls')),
-  #  url(r'mplimage.png', 'mpl.views.mplimage'),
-
-    
-    
+        
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
